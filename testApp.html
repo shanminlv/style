@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>app Link</title>
+    <meta property="al:ios:url" content="qpidnetwork://app/open?service=live&module=main&listtype=1" />
+    <meta property="al:ios:app_store_id" content="1133396273" />
+    <meta property="al:ios:app_name" content="qdating" />
+    <meta property="og:title" content="app Link" />
+    <meta property="og:type" content="website" />
+    <script>
+      function webOpenApp(clickLoadDom,appRelefPage,_callback){
+        var appRelefPage='service=live&module=main&listtype=1';
+    if(!clickLoadDom)return;
+    //service=live&module=main&listtype=1
+    var apppagestr = (appRelefPage?('?'+appRelefPage):'');
+    /*
+        检测手机端系统浏览器使用平台，暂时只做ios和非ios之分，及不是iphone的手机都一律看作非ios手机
+    */
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    var isIosMobile = !!(/iPad|iPhone|iPod|Mac/i.test(userAgent) && !window.MSStream);
+    // console.log(isIosMobile);
+    var url = {
+        open: 'qpidnetwork://app/open'+apppagestr,
+        down: isIosMobile?'https://itunes.apple.com/nz/app/qdating/id1133396273?mt=8':'https://play.google.com/store/apps/details?id=com.qpidnetwork.dating'
+    };
+    var timer = null;
+    var domBtn = clickLoadDom;
+    
+    //当前页面不可见时触发下面监听函数
+    listentMultipleEvent(document,'visibilitychange msvisibilitychange geckovisibility webkitvisibilitychange',()=>{
+        var tag = document.hidden || document.webkitHidden;
+        try{
+            clearTimeout(timer);
+        }catch(e){
+            return;
+        };
+    });          
+    addEvent(window,'pagehide',()=>{
+        clearTimeout(timer);
+    });
+    //立即打开app按钮
+    addEvent(domBtn,'click',(e)=>{
+        var _e = e || window.event;
+        _e.preventDefault();
+        if(typeof _callback === 'function'){
+            _callback(); 
+        };
+        var _isIos = isIosMobile;
+        //下面的代码保证任何时候都要去app  store
+        setTimeout(()=>{
+            window.location.href = url.down;
+        },2000);
+        if(!_isIos){
+            //这里用于判断费iphone 提前返回，防止打开两次
+            window.location.href = url.open;
+            return;
+        };
+        setTimeout(()=>{
+            window.location.href = url.open;
+        },16);
+        //safari 不能通过以下方式打开app ，
+        //所以设置一个定时器用location.href方式
+        var iframe = document.createElement('iframe');
+        var body = document.body;
+        iframe.style.cssText = 'display:none;';
+        iframe.src = url.open; 
+        body.appendChild(iframe);      
+    });
+};
+
+    </script>
+</head>
+<body>
+<div class="test" id="test" ></div>
+<script>
+webOpenApp(document.getElementById('test'));  
+</script>
+</body>
+</html>
